@@ -1,3 +1,9 @@
+# Dados de inscrição
+
+Nome: Matheus Henrique Cunha de Arruda
+E-mail: matheus.e.arruda@gmail.com
+Telefone: (65) 9924025-45
+
 # Sistema de Pessoas Desaparecidas
 
 Este projeto é uma aplicação Next.js para gerenciamento de pessoas desaparecidas.
@@ -18,12 +24,41 @@ git clone <url-do-repositorio>
 cd missing-persons
 ```
 
-### 2. Configure as variáveis de ambiente
-
-Crie um arquivo `.env` baseado no exemplo:
+### 2. Builde o projeto
 
 ```bash
-copy .env.example .env
+docker-compose build
 ```
 
-Edite o arquivo `.env` e configure a URL da API:
+### 3. Inicie a aplicação
+
+```bash
+docker-compose up
+```
+
+A aplicação estará disponível em `http://localhost:3000`.
+
+## Como executar localmente
+
+Se você preferir executar a aplicação localmente sem Docker, siga os passos abaixo:
+
+### 1. Clone o repositório
+
+```bash
+git clone <url-do-repositorio>
+cd missing-persons
+```
+
+### 2. Instale as dependências
+
+```bash
+npm install
+```
+
+### 3. Inicie a aplicação
+
+```bash
+npm run dev
+```
+
+A aplicação estará disponível em `http://localhost:3000`.

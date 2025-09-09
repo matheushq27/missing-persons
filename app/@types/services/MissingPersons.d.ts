@@ -1,4 +1,5 @@
 export interface GetMissingPersonsParams {
+    nome: string | null;
     faixaIdadeInicial: number | null;
     faixaIdadeFinal: number | null;
     sexo: 'MASCULINO' | 'FEMININO' | null;

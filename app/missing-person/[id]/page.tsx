@@ -10,7 +10,7 @@ import {
   MissingPersonOccurrences,
 } from "@/app/@types/services/MissingPersons";
 import { MissingPersonsService } from "@/app/services/MissingPersons";
-import { formatDateToBrazilian } from "@/app/utils/DateTime";
+import { convertDate, formatDateToBrazilian } from "@/app/utils/DateTime";
 import { Image } from "primereact/image";
 import IncidentInformationModal from "@/app/components/IncidentInformationModal";
 import { ProgressSpinner } from "primereact/progressspinner";
@@ -23,11 +23,28 @@ export default function MissingPersonDetails() {
   );
 
   const [dialogVisible, setDialogVisible] = useState(false);
-  const [infoMessage, setInfoMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadingOccurrences, setLoadingOccurrences] = useState(false);
   const [missingPersonId, setMissingPersonId] = useState<number>(0);
   const [occurrenceId, setOccurrenceId] = useState<number>(0);
+  const [validImageUrl, setValidImageUrl] =
+    useState<string>("/photo-empty.png");
+
+  const checkExistImage = async (url: string) => {
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          Accept: "image/*",
+        },
+      });
+
+      return response.ok;
+    } catch (error) {
+      console.error("Erro ao verificar imagem:", error);
+      return false;
+    }
+  };
 
   const handleOpenModal = () => {
     if (!person) {
@@ -62,9 +79,15 @@ export default function MissingPersonDetails() {
       const resp = await MissingPersonsService.getMissingPersonOccurrences(
         person.ultimaOcorrencia.ocoId
       );
-      setOccurrences(resp);
+      const sortedOccurrences = [...resp].sort((a, b) => {
+        const dateA = new Date(a.data).getTime();
+        const dateB = new Date(b.data).getTime();
+        return dateA - dateB;
+      });
+      setOccurrences(sortedOccurrences);
     } catch (error) {
       console.log(error);
+      setOccurrences([])
     } finally {
       setLoadingOccurrences(false);
     }
@@ -98,6 +121,18 @@ export default function MissingPersonDetails() {
     }
   }, [person]);
 
+  useEffect(() => {
+    if (person && person.urlFoto) {
+      const validateImage = async () => {
+        const imageExists = await checkExistImage(person.urlFoto!);
+        setValidImageUrl(imageExists ? person.urlFoto! : "/photo-empty.png");
+      };
+      validateImage();
+    } else {
+      setValidImageUrl("/photo-empty.png");
+    }
+  }, [person]);
+
   return (
     <div className="h-full">
       <div className="container mx-auto px-4 py-8">
@@ -121,7 +156,7 @@ export default function MissingPersonDetails() {
               <div className="md:col-span-1">
                 <div className="relative w-full mb-4">
                   <Image
-                    src={person.urlFoto || "/photo-empty.png"}
+                    src={validImageUrl}
                     alt={person.nome}
                     style={{ objectFit: "cover" }}
                     className="rounded-lg"
@@ -172,35 +207,58 @@ export default function MissingPersonDetails() {
                       )}
                     </p>
                   </div>
-                </div>
-
-                <div className="mb-6">
-                  <p className="font-semibold">Local do Desaparecimento:</p>
-                  <p>
-                    {informationNotAvailable(
-                      person.ultimaOcorrencia.localDesaparecimentoConcat
-                    )}
-                  </p>
-                </div>
-
-                <div className="mb-6">
-                  <p className="font-semibold">Descrição do Desaparecimento:</p>
-                  <p>
-                    {informationNotAvailable(
-                      person.ultimaOcorrencia.ocorrenciaEntrevDesapDTO
-                        .informacao
-                    )}
-                  </p>
-                </div>
-
-                <div className="mb-6">
-                  <p className="font-semibold">Vestimentas:</p>
-                  <p>
-                    {informationNotAvailable(
-                      person.ultimaOcorrencia.ocorrenciaEntrevDesapDTO
-                        .vestimentasDesaparecido
-                    )}
-                  </p>
+                  <div>
+                    <p className="font-semibold">Local do Desaparecimento:</p>
+                    <p>
+                      {informationNotAvailable(
+                        person.ultimaOcorrencia.localDesaparecimentoConcat
+                      )}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-semibold">
+                      Descrição do Desaparecimento:
+                    </p>
+                    <p>
+                      {informationNotAvailable(
+                        person.ultimaOcorrencia.ocorrenciaEntrevDesapDTO
+                          ?.informacao
+                      )}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-semibold">Vestimentas:</p>
+                    <p>
+                      {informationNotAvailable(
+                        person.ultimaOcorrencia.ocorrenciaEntrevDesapDTO
+                          ?.vestimentasDesaparecido
+                      )}
+                    </p>
+                  </div>
+                  {person.ultimaOcorrencia.encontradoVivo && (
+                    <>
+                      <div>
+                        <p className="font-semibold">Data de Localização:</p>
+                        <p>
+                          {person.ultimaOcorrencia.dataLocalizacao
+                            ? convertDate(
+                                person.ultimaOcorrencia.dataLocalizacao,
+                                "yyyy-mm-dd",
+                                "dd/mm/yyyy"
+                              )
+                            : informationNotAvailable(null)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-semibold">Encontrado vivo:</p>
+                        <p>
+                          {person.ultimaOcorrencia.encontradoVivo
+                            ? "Sim"
+                            : "Não"}
+                        </p>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -221,7 +279,7 @@ export default function MissingPersonDetails() {
               <div className="card mt-5">
                 {occurrences.map((occurrence) => (
                   <Card
-                    title={formatDateToBrazilian(occurrence.data)}
+                    title={convertDate(occurrence.data, "yyyy-mm-dd", "dd/mm/yyyy")}
                     key={occurrence.id}
                     className="mb-5"
                   >
@@ -238,7 +296,14 @@ export default function MissingPersonDetails() {
                         />
                       ))}
                     </div>
-                    <p className="mt-5">{occurrence.informacao}</p>
+                    <div
+                      className={`${
+                        occurrence.anexos.length > 0 ? " mt-5" : ""
+                      }`}
+                    >
+                      <label className="font-bold">Descrição:</label>
+                      <p>{occurrence.informacao}</p>
+                    </div>
                   </Card>
                 ))}
               </div>

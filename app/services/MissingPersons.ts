@@ -1,4 +1,4 @@
-import { GetMissingPersonsParams, MissingPersonsDataApi, MissingPerson, MissingPersonOccurrences, CreateMissingPersonOccurrencesData } from "../@types/services/MissingPersons";
+import { GetMissingPersonsParams, MissingPersonsDataApi, MissingPerson, MissingPersonOccurrences } from "../@types/services/MissingPersons";
 import { API } from "./api";
 
 const getMissingPersons = async (params: GetMissingPersonsParams): Promise<MissingPersonsDataApi> => {
@@ -31,9 +31,18 @@ const createMissingPersonOccurrences = async (data: FormData): Promise<any> => {
     return response.data;
 }
 
+const findMissingPersonStatistics = async (): Promise<{
+    quantPessoasDesaparecidas: number,
+    quantPessoasEncontradas: number
+}> => {
+    const response = await API.get(`/pessoas/aberto/estatistico`);
+    return response.data;
+}
+
 export const MissingPersonsService = {
     getMissingPersons,
     getMissingPersonById,
     getMissingPersonOccurrences,
-    createMissingPersonOccurrences
+    createMissingPersonOccurrences,
+    findMissingPersonStatistics
 };

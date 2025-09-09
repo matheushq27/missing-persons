@@ -1,5 +1,4 @@
 import React from "react";
-import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
 import Image from "next/image";
@@ -12,26 +11,6 @@ interface MissingPersonCardProps {
 }
 
 export default function MissingPersonCard({ person }: MissingPersonCardProps) {
-  console.log(person);
-  const header = (
-    <div className="relative w-full h-48">
-      <Image
-        src={person.urlFoto || "/photo-empty.png"}
-        alt={person.nome}
-        fill
-        style={{ objectFit: "contain" }}
-      />
-    </div>
-  );
-
-  const footer = (
-    <div className="flex justify-center items-center w-full">
-      <Link href={`/missing-person/${person.id}`}>
-        <Button label="Ver Detalhes" icon="pi pi-search" className="w-full" />
-      </Link>
-    </div>
-  );
-
   return (
     <div className="shadow-md bg-white p-2 rounded text-gray-700 h-auto min-h-[30rem] flex flex-col">
       <h2 className="mb-2 uppercase font-bold text-2xl">{person.nome}</h2>
@@ -61,7 +40,6 @@ export default function MissingPersonCard({ person }: MissingPersonCardProps) {
               <strong>Local:</strong>{" "}
               {person.ultimaOcorrencia.localDesaparecimentoConcat}
             </p>
-            <p className="line-clamp-2">{/* {person.description} */}</p>
             <div>
               <Tag
                 value={

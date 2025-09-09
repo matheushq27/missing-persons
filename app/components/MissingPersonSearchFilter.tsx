@@ -9,7 +9,7 @@ import { Sidebar } from "primereact/sidebar";
 import TagRemovable from "./TagRemovable";
 
 export interface OnSubmitProps {
-  name: string;
+  name: string | null;
   minAge: number | null;
   maxAge: number | null;
   gender: "MASCULINO" | "FEMININO" | null;
@@ -24,7 +24,7 @@ export default function MissingPersonSearchFilter({
 }: {
   onSubmit: (filters: OnSubmitProps) => void;
 }) {
-  const [nameFilter, setNameFilter] = useState("");
+  const [nameFilter, setNameFilter] = useState<string | null>(null);
   const [minAgeFilter, setMinAgeFilter] = useState<number | null>(null);
   const [maxAgeFilter, setMaxAgeFilter] = useState<number | null>(null);
   const [genderFilter, setGenderFilter] = useState<GenderType>(null);
@@ -50,7 +50,7 @@ export default function MissingPersonSearchFilter({
   ];
 
   const handleSearch = () => {
-    onSubmit({
+     onSubmit({
       name: nameFilter,
       minAge: minAgeFilter,
       maxAge: maxAgeFilter,
@@ -69,24 +69,42 @@ export default function MissingPersonSearchFilter({
   };
 
   const removeFilter = (filterType: string) => {
+    let name = nameFilter;
+    let minAge = minAgeFilter;
+    let maxAge = maxAgeFilter;
+    let gender = genderFilter;
+    let status = statusFilter;
+
     switch (filterType) {
       case "name":
+        name = "";
         setNameFilter("");
         break;
       case "minAge":
+        minAge = null;
         setMinAgeFilter(null);
         break;
       case "maxAge":
+        maxAge = null;
         setMaxAgeFilter(null);
         break;
       case "gender":
+        gender = null;
         setGenderFilter(null);
         break;
       case "status":
+        status = null;
         setStatusFilter(null);
         break;
     }
-    handleSearch();
+
+    onSubmit({
+      name,
+      minAge,
+      maxAge,
+      gender,
+      status,
+    });
   };
 
   const hasActiveFilters =

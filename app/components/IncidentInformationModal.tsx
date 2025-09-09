@@ -63,12 +63,61 @@ export default function IncidentInformationModal({
     }
   };
 
+  const requiredFields = {
+    informacao: infoMessage,
+    descricao: descriptionImages,
+    data: viewDate,
+  };
+
   const createMissingPersonOccurrences = async () => {
+    // Validação para todos os campos obrigatórios
     if (!occurrenceId) {
       toastMessage({
         severity: "error",
         summary: "Erro",
         detail: "Ocorrência inválida",
+      });
+      return;
+    }
+
+    if (!infoMessage) {
+      toastMessage({
+        severity: "error",
+        summary: "Erro",
+        detail: 'O campo "Descrição" é obrigatório',
+      });
+      return;
+    }
+
+    if (!viewDate) {
+      toastMessage({
+        severity: "error",
+        summary: "Erro",
+        detail: 'O campo "Visto em" é obrigatório',
+      });
+      return;
+    }
+
+    if (!descriptionImages) {
+      toastMessage({
+        severity: "error",
+        summary: "Erro",
+        detail: 'O campo "Descrição das imagens" é obrigatório',
+      });
+      return;
+    }
+
+    const hasFiles =
+      fileUploadRef &&
+      fileUploadRef.current &&
+      fileUploadRef.current.getFiles() &&
+      fileUploadRef.current.getFiles().length > 0;
+
+    if (!hasFiles) {
+      toastMessage({
+        severity: "error",
+        summary: "Erro",
+        detail: "É necessário anexar pelo menos um arquivo",
       });
       return;
     }
@@ -186,30 +235,33 @@ export default function IncidentInformationModal({
 
   const itemTemplate = (file: any, props: any) => {
     return (
-      <div className="flex items-center flex-wrap">
-        <div className="flex items-center" style={{ width: "40%" }}>
+      <div className="flex flex-col md:flex-row items-center gap-3 w-full">
+        <div className="flex items-center flex-grow w-full md:w-auto mb-2 md:mb-0">
           <img
             alt={file.name}
             role="presentation"
             src={file.objectURL}
             width={100}
+            className="max-w-[100px]"
           />
-          <span className="flex flex-column text-left ml-3">
-            {file.name}
+          <span className="flex flex-column text-left ml-3 overflow-hidden">
+            <span className="truncate max-w-[200px] md:max-w-full">{file.name}</span>
             <small className="ml-2">{new Date().toLocaleDateString()}</small>
           </span>
         </div>
-        <Tag
-          value={props.formatSize}
-          severity="warning"
-          className="px-3 py-2 mr-2"
-        />
-        <Button
-          type="button"
-          icon="pi pi-times"
-          className="p-button-outlined p-button-rounded p-button-danger"
-          onClick={() => onTemplateRemove(file, props.onRemove)}
-        />
+        <div className="flex items-center gap-2 ml-auto">
+          <Tag
+            value={props.formatSize}
+            severity="warning"
+            className="px-3 py-2"
+          />
+          <Button
+            type="button"
+            icon="pi pi-times"
+            className="p-button-outlined p-button-rounded p-button-danger"
+            onClick={() => onTemplateRemove(file, props.onRemove)}
+          />
+        </div>
       </div>
     );
   };
@@ -230,7 +282,7 @@ export default function IncidentInformationModal({
           style={{ fontSize: "1.2em", color: "var(--text-color-secondary)" }}
           className="my-5"
         >
-          Arraste e solte as imagens
+          Arraste e solte as imagens se quiser
         </span>
       </div>
     );
@@ -258,8 +310,11 @@ export default function IncidentInformationModal({
     <Dialog
       header="Enviar Informações"
       visible={isOpen}
-      style={{ width: "50vw" }}
       onHide={() => onClose()}
+      style={{ width: '100%', maxWidth: '650px' }}
+      contentStyle={{ padding: '1.5rem' }}
+      className="mx-auto" 
+      breakpoints={{ '960px': '95vw' }}
       footer={
         <div>
           <Button
@@ -314,7 +369,7 @@ export default function IncidentInformationModal({
             />
 
             <label htmlFor="upload" className="font-bold block mb-2 mt-5">
-              Anexos *
+              Imagens *
             </label>
 
             <FileUpload
@@ -343,7 +398,7 @@ export default function IncidentInformationModal({
           htmlFor="descriptionImages"
           className="font-bold block mb-2 mt-5"
         >
-          Descrição dos Anexos *
+          Descrição das imagens *
         </label>
         <InputTextarea
           id="descriptionImages"
